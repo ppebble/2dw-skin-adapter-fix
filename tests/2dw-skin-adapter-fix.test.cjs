@@ -12,8 +12,12 @@ const lua = fs.readFileSync(
 
 assert.match(modInfo, /^id=2DWSkinAdapterFix$/m);
 assert.match(modInfo, /^require=42_VSGirlBodySFW,4123567854998$/m);
+assert.match(modInfo, /^modversion=1\.0\.1$/m);
 assert.match(lua, /\["Base\.2dw_skinmaskp"\] = 3/);
 assert.match(lua, /\["Base\.2dw_skinmaskw"\] = 4/);
+assert.match(lua, /local savedSkinIndexKey = "2DWSkinAdapterFix\.skinIndex"/);
+assert.match(lua, /player:getModData\(\)\[savedSkinIndexKey\] = wornSkinIndex/);
+assert.match(lua, /return player:getModData\(\)\[savedSkinIndexKey\]/);
 assert.match(lua, /player:removeWornItem\(adapter, false\)/);
 assert.match(lua, /humanVisual:setSkinTextureIndex\(skinIndex\)/);
 assert.match(lua, /Events\.OnClothingUpdated\.Add\(applyWornAdapter\)/);
@@ -23,5 +27,13 @@ assert.match(lua, /if isClient\(\) then\s+sendVisual\(player\)/);
 const removePosition = lua.indexOf("player:removeWornItem(adapter, false)");
 const updatePosition = lua.indexOf("humanVisual:setSkinTextureIndex(skinIndex)");
 assert.ok(removePosition >= 0 && updatePosition > removePosition, "broken adapter must be removed before applying skin");
+
+const lookupPosition = lua.indexOf("local adapter, wornSkinIndex = findWornAdapter(player)");
+const selectionPosition = lua.indexOf("local skinIndex = getSelectedSkinIndex(player, wornSkinIndex)");
+const earlyReturnPosition = lua.indexOf("if not skinIndex then");
+assert.ok(
+  lookupPosition >= 0 && selectionPosition > lookupPosition && earlyReturnPosition > selectionPosition,
+  "clothing updates must restore the saved adapter skin after the adapter has been unequipped",
+);
 
 console.log("2D Wardrobe skin adapter fix contract passed.");

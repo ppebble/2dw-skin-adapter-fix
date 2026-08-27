@@ -12,8 +12,10 @@ This mod turns the two adapter items into safe skin-tone selectors:
 - `Base.2dw_skinmaskp` selects skin index 3 (`FemaleBody04`, pink).
 - `Base.2dw_skinmaskw` selects skin index 4 (`FemaleBody05`, white).
 
-The adapter is immediately unequipped but remains in the inventory. The native
-skin tone persists, so the broken XML clothing layer is never left rendered.
+The adapter is immediately unequipped but remains in the inventory. The selected
+skin tone is saved on the character and reapplied after later clothing updates,
+including when a 2D Wardrobe character mask rebuilds the visual. This keeps the
+native face from reappearing through the flat character mask.
 
 Required load order:
 
