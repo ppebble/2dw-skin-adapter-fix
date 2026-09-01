@@ -17,6 +17,10 @@ skin tone is saved on the character and reapplied after later clothing updates,
 including when a 2D Wardrobe character mask rebuilds the visual. This keeps the
 native face from reappearing through the flat character mask.
 
+When a 2D Wardrobe head is worn, choosing the fourth or fifth skin directly
+through Skin Color Changer is also remembered and reapplied. Other skin choices
+and characters without a 2D Wardrobe head remain untouched.
+
 Required load order:
 
 1. `42_VSGirlBodySFW`

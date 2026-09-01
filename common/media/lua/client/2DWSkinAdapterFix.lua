@@ -4,6 +4,7 @@ local adapterSkinIndexes = {
 }
 
 local savedSkinIndexKey = "2DWSkinAdapterFix.skinIndex"
+local directSkinIndexes = { [3] = true, [4] = true }
 local applyingAdapter = false
 
 local function findWornAdapter(player)
@@ -19,10 +20,41 @@ local function findWornAdapter(player)
     return nil, nil
 end
 
-local function getSelectedSkinIndex(player, wornSkinIndex)
+local function hasWorn2DWHead(player)
+    local wornItems = player:getWornItems()
+    for index = 0, wornItems:size() - 1 do
+        local item = wornItems:get(index):getItem()
+        if item and item:getBodyLocation() == "tdw:stylehead" then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function getSelectedSkinIndex(player, wornSkinIndex, humanVisual)
     if wornSkinIndex then
-        player:getModData()[savedSkinIndexKey] = wornSkinIndex
+        local modData = player:getModData()
+        if modData[savedSkinIndexKey] ~= wornSkinIndex then
+            modData[savedSkinIndexKey] = wornSkinIndex
+            if isClient() then
+                player:transmitModData()
+            end
+        end
         return wornSkinIndex
+    end
+
+    local directSkinIndex = humanVisual:getSkinTextureIndex()
+    if hasWorn2DWHead(player) and directSkinIndexes[directSkinIndex] then
+        local modData = player:getModData()
+        if modData[savedSkinIndexKey] ~= directSkinIndex then
+            modData[savedSkinIndexKey] = directSkinIndex
+            if isClient() then
+                player:transmitModData()
+            end
+            print("[2DWSkinAdapterFix] Saved direct 2DW head skin index " .. tostring(directSkinIndex))
+        end
+        return directSkinIndex
     end
 
     return player:getModData()[savedSkinIndexKey]
@@ -34,13 +66,12 @@ local function applyWornAdapter(player)
     end
 
     local adapter, wornSkinIndex = findWornAdapter(player)
-    local skinIndex = getSelectedSkinIndex(player, wornSkinIndex)
-    if not skinIndex then
-        return
-    end
-
     local humanVisual = player:getHumanVisual()
     if not humanVisual then
+        return
+    end
+    local skinIndex = getSelectedSkinIndex(player, wornSkinIndex, humanVisual)
+    if not skinIndex then
         return
     end
 
